@@ -1,0 +1,251 @@
+{
+  "project_name": { "type": "string" },
+  "aws_region": { "type": "string" },
+  "availability_zones": {
+    "type": "array",
+    "items": { "type": "string" }
+  },
+
+  "vpc": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "vpc_name": { "type": "string" },
+        "network": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "existing": {
+              "type": "object",
+              "properties": {
+                "vpcId": { "type": "string" },
+                "vpc_cidr": { "type": "string" },
+                "subnets": {
+                  "type": "object",
+                  "properties": {
+                    "privateSubnets": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    },
+                    "publicSubnets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "cidr": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "new": {
+              "type": "object",
+              "properties": {
+                "vpc_cidr": { "type": "string" },
+                "subnets": {
+                  "type": "object",
+                  "properties": {
+                    "privateSubnets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cidr": { "type": "string" },
+                          "availability_zone": { "type": "string" }
+                        }
+                      }
+                    },
+                    "publicSubnets": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "cidr": { "type": "string" },
+                          "availability_zone": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                },
+                "vpc_endpoints": {
+                  "type": "object",
+                  "properties": {
+                    "required": { "type": "boolean" },
+                    "endpoints": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "serviceName": { "type": "string" },
+                          "type": { "type": "string" }
+                        }
+                      }
+                    }
+                  }
+                },
+                "natGateway": {
+                  "type": "object",
+                  "properties": {
+                    "required": { "type": "boolean" }
+                  }
+                },
+                "internetGateway": {
+                  "type": "object",
+                  "properties": {
+                    "required": { "type": "boolean" }
+                  }
+                },
+                "site2site_vpn": {
+                  "type": "object",
+                  "properties": {
+                    "required": { "type": "boolean" },
+                    "customerGatewayIp": { "type": "string" }
+                  }
+                },
+                "cloudfront": {
+                  "type": "object",
+                  "properties": {
+                    "required": { "type": "boolean" },
+                    "bucket_name": { "type": "string" }
+                  }
+                },
+                "route53": {
+                  "type": "object",
+                  "properties": {
+                    "required": { "type": "boolean" },
+                    "domainName": { "type": "string" },
+                    "recordType": { "type": "string" },
+                    "hostedZoneId": { "type": "string" },
+                    "acmCertificateArn": { "type": "string" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "ecs": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "services": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "serviceName": { "type": "string" },
+                  "servicePort": { "type": "number" },
+                  "servicePath": { "type": "string" },
+                  "serviceHealthCheck": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "database": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "rds": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "db_username": { "type": "string" },
+                  "db_password": { "type": "string" },
+                  "db_port": { "type": "number" },
+                  "db_engine": { "type": "string" },
+                  "nacl_id": { "type": "string" },
+                  "subnets": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": { "type": "string" },
+                        "cidr": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "s3": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "buckets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "redis": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "config": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "port": { "type": "number" },
+                  "engine": { "type": "string" },
+                  "nodeType": { "type": "string" },
+                  "clusterSize": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "ec2": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "config": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "is_public_ip_required": { "type": "boolean" },
+                  "availability_zone": { "type": "string" },
+                  "name": { "type": "string" },
+                  "ami_id": { "type": "string" },
+                  "ami_type": { "type": "string" },
+                  "keyName": { "type": "string" },
+                  "userData": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "batch": {
+          "type": "object",
+          "properties": {
+            "required": { "type": "boolean" },
+            "config": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "ami_type": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
