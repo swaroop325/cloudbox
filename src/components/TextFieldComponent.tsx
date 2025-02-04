@@ -1,26 +1,33 @@
 import React from "react";
 import { TextField } from "@mui/material";
-import { formatLabel } from "../utils/helper";
 
 interface TextFieldComponentProps {
   fieldKey: string;
   value: string;
-  handleInputChange: (key: string, value: string) => void;
+  label?: string;
+  placeholder?: string;
+  handleInputChange: (key: string, value: unknown) => void;
 }
 
 const TextFieldComponent: React.FC<TextFieldComponentProps> = ({
   fieldKey,
   value,
+  label,
+  placeholder,
   handleInputChange,
 }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange(fieldKey, e.target.value);
+  };
+
   return (
     <TextField
-      key={fieldKey}
-      label={formatLabel(fieldKey)}
-      value={value}
-      onChange={(e) => handleInputChange(fieldKey, e.target.value)}
+      label={label || fieldKey}
+      value={value || ""}
+      onChange={handleChange}
+      placeholder={placeholder}
       fullWidth
-      margin="dense"
+      margin="normal"
     />
   );
 };

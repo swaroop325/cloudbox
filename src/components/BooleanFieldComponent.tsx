@@ -1,30 +1,33 @@
-import { Checkbox, FormControlLabel } from "@mui/material";
 import React from "react";
-import { formatLabel } from "../utils/helper";
+import { FormControlLabel, Checkbox } from "@mui/material";
 
-interface BooleanFieldProps {
+interface BooleanComponentFieldProps {
   fieldKey: string;
   value: boolean;
   handleInputChange: (key: string, value: unknown) => void;
 }
 
-const BooleanFieldComponent: React.FC<BooleanFieldProps> = ({
+const BooleanComponentField: React.FC<BooleanComponentFieldProps> = ({
   fieldKey,
   value,
   handleInputChange,
 }) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleInputChange(fieldKey, e.target.checked);
+  };
+
   return (
     <FormControlLabel
-      key={fieldKey}
       control={
         <Checkbox
-          checked={value}
-          onChange={(e) => handleInputChange(fieldKey, e.target.checked)}
+          checked={value || false}
+          onChange={handleChange}
+          color="primary"
         />
       }
-      label={formatLabel(fieldKey)}
+      label={fieldKey}
     />
   );
 };
 
-export default BooleanFieldComponent;
+export default BooleanComponentField;

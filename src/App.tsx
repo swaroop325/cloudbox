@@ -6,11 +6,7 @@ import type { Navigation } from "@toolpad/core/AppProvider";
 
 const NAVIGATION: Navigation = [
   {
-    kind: "header",
-    title: "Main items",
-  },
-  {
-    title: "",
+    title: "DashBoard",
     icon: <DashboardIcon />,
   },
 ];
