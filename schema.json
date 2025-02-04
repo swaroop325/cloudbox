@@ -1,439 +1,295 @@
 {
-  "project_base": [
-    {
-      "label": "Project Name",
-      "name": "project_name",
-      "type": "text",
-      "value": "SRS"
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "1.0.0",
+  "title": "Infrastructure Configuration Form Schema",
+  "type": "object",
+  "definitions": {
+    "networkDefinitions": {
+      "existingVpc": {
+        "type": "object",
+        "properties": {
+          "vpcId": { "type": "string", "pattern": "^vpc-[a-f0-9]{8,17}$" },
+          "vpc_cidr": {
+            "type": "string",
+            "pattern": "^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])/(3[0-2]|[12]?[0-9])$"
+          },
+          "subnets": {
+            "type": "object",
+            "properties": {
+              "privateSubnets": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/subnet" }
+              },
+              "publicSubnets": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/subnet" }
+              }
+            }
+          }
+        }
+      },
+      "newVpc": {
+        "type": "object",
+        "properties": {
+          "vpc_cidr": {
+            "type": "string",
+            "pattern": "^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])/(3[0-2]|[12]?[0-9])$"
+          },
+          "subnets": {
+            "type": "object",
+            "properties": {
+              "privateSubnets": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/newSubnet" }
+              },
+              "publicSubnets": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/newSubnet" }
+              }
+            }
+          },
+          "vpc_endpoints": { "$ref": "#/definitions/vpcEndpoints" },
+          "natGateway": { "$ref": "#/definitions/natGateway" },
+          "internetGateway": { "$ref": "#/definitions/internetGateway" },
+          "site2site_vpn": { "$ref": "#/definitions/siteToSiteVpn" },
+          "cloudfront": { "$ref": "#/definitions/cloudfront" },
+          "route53": { "$ref": "#/definitions/route53" }
+        }
+      }
     },
-    {
-      "label": "AWS Region",
-      "name": "aws_region",
-      "type": "text",
-      "placeholder": "ap-southeast-1",
-      "value": "ap-southeast-1"
+    "subnet": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^subnet-[a-f0-9]{8,17}$" },
+        "cidr": {
+          "type": "string",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])/(3[0-2]|[12]?[0-9])$"
+        }
+      },
+      "required": ["id", "cidr"]
     },
-    {
-      "label": "Availability Zones",
-      "name": "availability_zones",
-      "type": "checkbox",
-      "options": ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"],
-      "value": ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
+    "newSubnet": {
+      "type": "object",
+      "properties": {
+        "cidr": {
+          "type": "string",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])\\.){3}(25[0-5]|2[0-4][0-9]|1[0-9]{2}|[1-9]?[0-9])/(3[0-2]|[12]?[0-9])$"
+        },
+        "availability_zone": {
+          "type": "string",
+          "enum": ["ap-southeast-1a", "ap-southeast-1b", "ap-southeast-1c"]
+        }
+      },
+      "required": ["cidr", "availability_zone"]
+    },
+    "vpcEndpoints": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "endpoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "serviceName": { "type": "string" },
+              "type": { "type": "string", "enum": ["Interface", "Gateway"] }
+            }
+          }
+        }
+      }
+    },
+    "natGateway": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" }
+      }
+    },
+    "internetGateway": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" }
+      }
+    },
+    "siteToSiteVpn": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "customerGatewayIp": { "type": "string", "format": "ipv4" }
+      }
+    },
+    "cloudfront": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "bucket_name": { "type": "string" }
+      }
+    },
+    "route53": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "domainName": { "type": "string", "format": "hostname" },
+        "recordType": { "type": "string", "enum": ["A", "AAAA", "CNAME"] },
+        "hostedZoneId": { "type": "string" },
+        "acmCertificateArn": { "type": "string" }
+      }
+    },
+    "ecsService": {
+      "type": "object",
+      "properties": {
+        "serviceName": { "type": "string" },
+        "servicePort": { "type": "number", "minimum": 1, "maximum": 65535 },
+        "servicePath": { "type": "string" },
+        "serviceHealthCheck": { "type": "string" }
+      },
+      "required": ["serviceName", "servicePort"]
+    },
+    "rdsConfig": {
+      "type": "object",
+      "properties": {
+        "db_username": { "type": "string" },
+        "db_password": { "type": "string" },
+        "db_port": { "type": "number" },
+        "db_engine": { "type": "string" },
+        "nacl_id": { "type": "string" },
+        "subnets": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/subnet" }
+        }
+      },
+      "required": ["db_username", "db_password", "db_engine"]
+    },
+    "ec2Config": {
+      "type": "object",
+      "properties": {
+        "is_public_ip_required": { "type": "boolean" },
+        "availability_zone": { "type": "string" },
+        "name": { "type": "string" },
+        "ami_id": { "type": "string" },
+        "ami_type": { "type": "string" },
+        "keyName": { "type": "string" },
+        "userData": { "type": "string" }
+      },
+      "required": ["name", "ami_id", "ami_type"]
     }
-  ],
-  "vpc_list": [
-    {
-
-      "label": "VPC List",
-      "name": "vpc_list",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "VPC Name",
-          "name": "vpc_name",
-          "type": "text",
-          "value": "DEV"
-        },
-        {
-          "label": "Network Type",
-          "name": "network.required",
-          "type": "boolean",
-          "value": false
-        },
-        {
-          "label": "Existing VPC",
-          "name": "existing",
-          "type": "nested-group",
-          "fields": [
-            {
-              "label": "VPC ID",
-              "name": "vpcId",
-              "type": "text",
-              "value": "vpc-c7d80aa1"
-            },
-            {
-              "label": "VPC CIDR",
-              "name": "vpc_cidr",
-              "type": "text",
-              "value": "172.31.0.0/16"
-            },
-            {
-              "label": "Public Subnets",
-              "name": "subnets.publicSubnets",
-              "type": "array-group",
-              "value": [
-                { "id": "subnet-0d16916b", "cidr": "172.31.16.0/20" },
-                { "id": "subnet-197bcc51", "cidr": "172.31.32.0/20" },
-                { "id": "subnet-f5a0d2ac", "cidr": "172.31.0.0/20" }
-              ],
-              "fields": [
-                { "label": "Subnet ID", "name": "id", "type": "text" },
-                { "label": "CIDR", "name": "cidr", "type": "text" }
-              ]
-            }
-          ]
-        },
-        {
-          "label": "New VPC Configuration",
-          "name": "new",
-          "type": "nested-group",
-          "fields": [
-            {
-              "label": "VPC CIDR",
-              "name": "vpc_cidr",
-              "type": "text",
-              "value": "10.0.0.0/16"
-            },
-            {
-              "label": "Private Subnets",
-              "name": "subnets.privateSubnets",
-              "type": "array-group",
-              "value": [
-                {
-                  "cidr": "10.0.1.0/24",
-                  "availability_zone": "ap-southeast-1a"
+  },
+  "properties": {
+    "project_name": { "type": "string", "minLength": 3 },
+    "aws_region": { "type": "string", "enum": ["ap-southeast-1"] },
+    "availability_zones": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1
+    },
+    "vpc_list": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "vpc_name": { "type": "string" },
+          "network": {
+            "type": "object",
+            "oneOf": [
+              {
+                "properties": {
+                  "existing": {
+                    "$ref": "#/definitions/networkDefinitions/existingVpc"
+                  }
                 },
-                {
-                  "cidr": "10.0.2.0/24",
-                  "availability_zone": "ap-southeast-1b"
+                "required": ["existing"]
+              },
+              {
+                "properties": {
+                  "new": { "$ref": "#/definitions/networkDefinitions/newVpc" }
                 },
-                {
-                  "cidr": "10.0.3.0/24",
-                  "availability_zone": "ap-southeast-1c"
+                "required": ["new"]
+              }
+            ]
+          },
+          "ecs": {
+            "type": "object",
+            "properties": {
+              "required": { "type": "boolean" },
+              "services": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/ecsService" }
+              }
+            }
+          },
+          "database": {
+            "type": "object",
+            "properties": {
+              "required": { "type": "boolean" },
+              "rds": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/rdsConfig" }
+              }
+            }
+          },
+          "s3": {
+            "type": "object",
+            "properties": {
+              "required": { "type": "boolean" },
+              "buckets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" }
+                  }
                 }
-              ],
-              "fields": [
-                { "label": "CIDR", "name": "cidr", "type": "text" },
-                {
-                  "label": "Availability Zone",
-                  "name": "availability_zone",
-                  "type": "text"
+              }
+            }
+          },
+          "redis": {
+            "type": "object",
+            "properties": {
+              "required": { "type": "boolean" },
+              "config": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "port": { "type": "number" },
+                    "engine": { "type": "string" },
+                    "nodeType": { "type": "string" },
+                    "clusterSize": { "type": "number" }
+                  }
                 }
-              ]
-            },
-            {
-              "label": "Public Subnets",
-              "name": "subnets.publicSubnets",
-              "type": "array-group",
-              "value": [
-                {
-                  "cidr": "10.0.4.0/24",
-                  "availability_zone": "ap-southeast-1a"
-                },
-                {
-                  "cidr": "10.0.5.0/24",
-                  "availability_zone": "ap-southeast-1b"
-                },
-                {
-                  "cidr": "10.0.6.0/24",
-                  "availability_zone": "ap-southeast-1c"
+              }
+            }
+          },
+          "ec2": {
+            "type": "object",
+            "properties": {
+              "required": { "type": "boolean" },
+              "config": {
+                "type": "array",
+                "items": { "$ref": "#/definitions/ec2Config" }
+              }
+            }
+          },
+          "batch": {
+            "type": "object",
+            "properties": {
+              "required": { "type": "boolean" },
+              "config": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "ami_type": { "type": "string" }
+                  }
                 }
-              ],
-              "fields": [
-                { "label": "CIDR", "name": "cidr", "type": "text" },
-                {
-                  "label": "Availability Zone",
-                  "name": "availability_zone",
-                  "type": "text"
-                }
-              ]
-            },
-            {
-              "label": "VPC Endpoints",
-              "name": "vpc_endpoints.required",
-              "type": "boolean",
-              "value": false
-            },
-            {
-              "label": "NAT Gateway Required",
-              "name": "natGateway.required",
-              "type": "boolean",
-              "value": true
-            },
-            {
-              "label": "Internet Gateway Required",
-              "name": "internetGateway.required",
-              "type": "boolean",
-              "value": true
-            },
-            {
-              "label": "Site-to-Site VPN",
-              "name": "site2site_vpn.required",
-              "type": "boolean",
-              "value": false
-            },
-            {
-              "label": "CloudFront Bucket Name",
-              "name": "cloudfront.bucket_name",
-              "type": "text",
-              "value": "geninfra-sample-bucket"
-            },
-            {
-              "label": "Route53 Domain Name",
-              "name": "route53.domainName",
-              "type": "text",
-              "value": "howai-internal-dev.link"
-            },
-            {
-              "label": "Route53 Record Type",
-              "name": "route53.recordType",
-              "type": "text",
-              "value": "A"
-            },
-            {
-              "label": "Route53 Hosted Zone ID",
-              "name": "route53.hostedZoneId",
-              "type": "text",
-              "value": "Z07479321PD13T12ZETVB"
-            },
-            {
-              "label": "ACM Certificate ARN",
-              "name": "route53.acmCertificateArn",
-              "type": "text",
-              "value": "arn:aws:acm:us-east-1:058264409713:certificate/2321e5f9-6aba-4a2f-a637-95bdbb8d4fa9"
+              }
             }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "ECS Services",
-      "name": "ecs",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "Required",
-          "name": "required",
-          "type": "boolean",
-          "value": false
+          }
         },
-        {
-          "label": "Services",
-          "name": "services",
-          "type": "array-group",
-          "value": [
-            {
-              "serviceName": "msvc1",
-              "servicePort": 8080,
-              "servicePath": "/health",
-              "serviceHealthCheck": "/health"
-            },
-            {
-              "serviceName": "msvc2",
-              "servicePort": 8081,
-              "servicePath": "/health2",
-              "serviceHealthCheck": "/health"
-            },
-            {
-              "serviceName": "msvc3",
-              "servicePort": 8082,
-              "servicePath": "/health3",
-              "serviceHealthCheck": "/health"
-            }
-          ],
-          "fields": [
-            { "label": "Service Name", "name": "serviceName", "type": "text" },
-            {
-              "label": "Service Port",
-              "name": "servicePort",
-              "type": "number"
-            },
-            { "label": "Service Path", "name": "servicePath", "type": "text" },
-            {
-              "label": "Service Health Check",
-              "name": "serviceHealthCheck",
-              "type": "text"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "Database Configuration",
-      "name": "database",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "Required",
-          "name": "required",
-          "type": "boolean",
-          "value": true
-        },
-        {
-          "label": "RDS Configuration",
-          "name": "rds",
-          "type": "array-group",
-          "value": [
-            {
-              "db_username": "bobcat",
-              "db_password": "password",
-              "db_port": 1433,
-              "db_engine": "sqlserver-ex",
-              "nacl_id": "acl-b9b1f5df",
-              "subnets": [
-                { "id": "subnet-0d16916b", "cidr": "172.31.16.0/20" },
-                { "id": "subnet-197bcc51", "cidr": "172.31.32.0/20" },
-                { "id": "subnet-f5a0d2ac", "cidr": "172.31.0.0/20" }
-              ]
-            }
-          ],
-          "fields": [
-            {
-              "label": "Database Username",
-              "name": "db_username",
-              "type": "text"
-            },
-            {
-              "label": "Database Password",
-              "name": "db_password",
-              "type": "password"
-            },
-            { "label": "Database Port", "name": "db_port", "type": "number" },
-            { "label": "Database Engine", "name": "db_engine", "type": "text" },
-            { "label": "NACL ID", "name": "nacl_id", "type": "text" },
-            {
-              "label": "Subnets",
-              "name": "subnets",
-              "type": "array-group",
-              "value": [
-                { "id": "subnet-0d16916b", "cidr": "172.31.16.0/20" },
-                { "id": "subnet-197bcc51", "cidr": "172.31.32.0/20" },
-                { "id": "subnet-f5a0d2ac", "cidr": "172.31.0.0/20" }
-              ],
-              "fields": [
-                { "label": "Subnet ID", "name": "id", "type": "text" },
-                { "label": "CIDR", "name": "cidr", "type": "text" }
-              ]
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "S3 Buckets",
-      "name": "s3",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "Required",
-          "name": "required",
-          "type": "boolean",
-          "value": false
-        },
-        {
-          "label": "Buckets",
-          "name": "buckets",
-          "type": "array-group",
-          "value": [{ "name": "gen-infra-new-bucket" }],
-          "fields": [{ "label": "Bucket Name", "name": "name", "type": "text" }]
-        }
-      ]
-    },
-    {
-      "label": "Redis Configuration",
-      "name": "redis",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "Required",
-          "name": "required",
-          "type": "boolean",
-          "value": false
-        },
-        {
-          "label": "Config",
-          "name": "config",
-          "type": "array-group",
-          "value": [
-            {
-              "name": "geninfra",
-              "port": 6379,
-              "engine": "7.1",
-              "nodeType": "cache.t3.micro",
-              "clusterSize": 1
-            }
-          ],
-          "fields": [
-            { "label": "Name", "name": "name", "type": "text" },
-            { "label": "Port", "name": "port", "type": "number" },
-            { "label": "Engine", "name": "engine", "type": "text" },
-            { "label": "Node Type", "name": "nodeType", "type": "text" },
-            { "label": "Cluster Size", "name": "clusterSize", "type": "number" }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "EC2 Instances",
-      "name": "ec2",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "Required",
-          "name": "required",
-          "type": "boolean",
-          "value": true
-        },
-        {
-          "label": "Instances",
-          "name": "config",
-          "type": "array-group",
-          "value": [
-            {
-              "is_public_ip_required": true,
-              "availability_zone": "ap-southeast-1a",
-              "name": "compute-0",
-              "ami_id": "ami-07fd6595c58b80f0b",
-              "ami_type": "t2.micro",
-              "keyName": "geninfra-test",
-              "userData": ""
-            },
-            {
-              "is_public_ip_required": true,
-              "availability_zone": "ap-southeast-1b",
-              "name": "compute-1",
-              "ami_id": "ami-07fd6595c58b80f0b",
-              "keyName": "geninfra-test",
-              "ami_type": "t2.micro"
-            }
-          ],
-          "fields": [
-            { "label": "Instance Name", "name": "name", "type": "text" },
-            { "label": "AMI ID", "name": "ami_id", "type": "text" },
-            { "label": "AMI Type", "name": "ami_type", "type": "text" },
-            {
-              "label": "Public IP Required",
-              "name": "is_public_ip_required",
-              "type": "boolean"
-            },
-            { "label": "Key Name", "name": "keyName", "type": "text" },
-            { "label": "User Data", "name": "userData", "type": "text" }
-          ]
-        }
-      ]
-    },
-    {
-      "label": "Batch Configuration",
-      "name": "batch",
-      "type": "nested-group",
-      "fields": [
-        {
-          "label": "Required",
-          "name": "required",
-          "type": "boolean",
-          "value": false
-        },
-        {
-          "label": "Batch Instances",
-          "name": "config",
-          "type": "array-group",
-          "value": [{ "name": "batch0", "ami_type": "t2.micro" }],
-          "fields": [
-            { "label": "Batch Instance Name", "name": "name", "type": "text" },
-            { "label": "AMI Type", "name": "ami_type", "type": "text" }
-          ]
-        }
-      ]
+        "required": ["vpc_name", "network"]
+      }
     }
-  ]
+  },
+  "required": ["project_name", "aws_region", "availability_zones", "vpc_list"]
 }
